@@ -1,4 +1,5 @@
 from Buttons import *
+from Processor import *
 import numpy as np
 import wx
 
@@ -6,6 +7,10 @@ class MyFrame(wx.Frame):
 	def __init__(self, parent, title):
 		super().__init__(parent, title=title, size=(1450,650))
 		panel = MyPanel(self)
+		self.Bind(wx.EVT_CLOSE, self.onClose)
+
+	def onClose(self, event):
+		self.Destroy()
 
 class MyButton(wx.Button):
 	def __init__(self, panel):
@@ -100,13 +105,6 @@ class LearnButton(wx.Button):
 			for j in range(49):
 				if i != j:
 					self.unwinded_matrix[i][j] += (self.unwinded_vector[i]*self.unwinded_vector[j])
-	def update(self):
-		for i in range(49):
-				self.matrix[int(i/7)][i%7] = self.unwinded_vector[i]
-		for i in range(49):
-			for j in range(49):
-				if i != j:
-					self.unwinded_matrix[i][j] += (self.unwinded_vector[i]*self.unwinded_vector[j])
 
 
 class MyApp(wx.App):
@@ -116,5 +114,6 @@ class MyApp(wx.App):
 		return True
 
 if __name__ == '__main__':
+	print(m)
 	app = MyApp()
 	app.MainLoop()
