@@ -9,7 +9,6 @@ class Matrix():
 		self.vector = [0 for i in range(49)]
 
 	def input(self, panel):
-		print(self.matrix)
 		if self.trigger:
 			for i in range(7):
 				for j in range(7):

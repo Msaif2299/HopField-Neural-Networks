@@ -17,6 +17,7 @@ class ClearButton(wx.Button):
 				self.panel.matrix[i][j].setVal(0)
 				self.panel.secondMatrix[i][j].setVal(0)
 		m.reset()
+		self.panel.learn.calcEnergy()
 
 class RestartButton(wx.Button):
 	def __init__(self, panel, pos):
@@ -36,6 +37,7 @@ class RestartButton(wx.Button):
 		for i in range(49):
 			self.panel.learn.unwinded_vector[i] = 0
 		m.reset()
+		self.panel.learn.calcEnergy()
 
 
 class RunAsync10(wx.Button): #This needs a complete rework, it is messing with the learnt parameters, need to make its own versions of things and pass it between the other classes
@@ -47,6 +49,7 @@ class RunAsync10(wx.Button): #This needs a complete rework, it is messing with t
 	def onClick(self, event):
 		m.input(self.panel)
 		m.runAsync(self.panel, 10)
+		self.panel.learn.calcEnergy()
 
 class RunAsync100(wx.Button):
 	def __init__(self, panel, pos):
@@ -57,6 +60,7 @@ class RunAsync100(wx.Button):
 	def onClick(self, event):
 		m.input(self.panel)
 		m.runAsync(self.panel, 100)
+		self.panel.learn.calcEnergy()
 
 class RunAsync1000(wx.Button):
 	def __init__(self, panel, pos):
@@ -67,6 +71,7 @@ class RunAsync1000(wx.Button):
 	def onClick(self, event):
 		m.input(self.panel)
 		m.runAsync(self.panel, 1000)
+		self.panel.learn.calcEnergy()
 
 
 class RunSync(wx.Button):
@@ -78,3 +83,4 @@ class RunSync(wx.Button):
 	def onClick(self, event):
 		m.input(self.panel)
 		m.runSync(self.panel)
+		self.panel.learn.calcEnergy()
