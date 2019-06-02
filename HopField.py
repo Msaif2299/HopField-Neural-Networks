@@ -15,13 +15,13 @@ class MyFrame(wx.Frame):
 class MyButton(wx.Button):
 	def __init__(self, panel):
 		super().__init__(panel, label='', size=(80, 80))
-		self.value = -1
+		self.value = 0
 		self.SetBackgroundColour('white')
 		self.Bind(wx.EVT_LEFT_DOWN, self.onClick)
 
 	def onClick(self, event):
 		if self.value == 1:
-			self.value = -1
+			self.value = 0
 			self.SetBackgroundColour('white')
 		else:
 			self.value = 1
@@ -71,6 +71,10 @@ class MyPanel(wx.Panel):
 		self.runasync100 = RunAsync100(self, (672, 250))
 		self.runasync1000 = RunAsync1000(self, (669, 275))
 		self.runsync = RunSync(self, (675, 325))
+		self.energy1 = wx.StaticText(self, pos=(400, 575))
+		self.energy1.SetLabel('Energy: ')
+		self.energy2 = wx.StaticText(self, pos=(1050, 575))
+		self.energy2.SetLabel('Energy: ')
 
 
 class LearnButton(wx.Button):
@@ -92,7 +96,21 @@ class LearnButton(wx.Button):
 				self.unwinded_vector.append(self.matrix[i][j])
 	
 	def calcEnergy(self):
-		pass
+		self.energy = 0
+		for i in range(49):
+			for j in range(49):
+				self.energy += self.unwinded_matrix[i][j]*self.unwinded_vector[i]*self.unwinded_vector[j]
+		self.energy = -1*(self.energy/2)
+		self.panel.energy1.SetLabel('Energy: '+str(self.energy))
+		for i in range(7):
+			for j in range(7):
+				self.unwinded_vector[i*7+j] = self.panel.secondMatrix[i][j].getVal()
+		self.energy = 0
+		for i in range(49):
+			for j in range(49):
+				self.energy += self.unwinded_matrix[i][j]*self.unwinded_vector[i]*self.unwinded_vector[j]
+		self.energy = -1*(self.energy/2)
+		self.panel.energy2.SetLabel('Energy: '+str(self.energy))
 
 	def onClick(self, event):
 		for i in range(7):
@@ -104,8 +122,9 @@ class LearnButton(wx.Button):
 		for i in range(49):
 			for j in range(49):
 				if i != j:
-					self.unwinded_matrix[i][j] += (self.unwinded_vector[i]*self.unwinded_vector[j])
-
+					self.unwinded_matrix[i][j] += (2*self.unwinded_vector[i]-1)*(2*self.unwinded_vector[j]-1)
+		self.calcEnergy()
+		
 
 class MyApp(wx.App):
 	def OnInit(self):

@@ -14,8 +14,8 @@ class ClearButton(wx.Button):
 	def onClick(self, event):
 		for i in range(7):
 			for j in range(7):
-				self.panel.matrix[i][j].setVal(-1)
-				self.panel.secondMatrix[i][j].setVal(-1)
+				self.panel.matrix[i][j].setVal(0)
+				self.panel.secondMatrix[i][j].setVal(0)
 		m.reset()
 
 class RestartButton(wx.Button):
@@ -27,9 +27,14 @@ class RestartButton(wx.Button):
 	def onClick(self, event):
 		for i in range(7):
 			for j in range(7):
-				self.panel.matrix[i][j].setVal(-1)
+				self.panel.matrix[i][j].setVal(0)
 				self.panel.learn.matrix[i][j] = 0
-				self.panel.secondMatrix[i][j].setVal(-1)
+				self.panel.secondMatrix[i][j].setVal(0)
+		for i in range(49):
+			for j in range(49):
+				self.panel.learn.unwinded_matrix[i][j] = 0
+		for i in range(49):
+			self.panel.learn.unwinded_vector[i] = 0
 		m.reset()
 
 
@@ -68,6 +73,8 @@ class RunSync(wx.Button):
 	def __init__(self, panel, pos):
 		super().__init__(panel, label='Run Sync', pos=pos)
 		self.Bind(wx.EVT_BUTTON, self.onClick)
+		self.panel = panel
 
 	def onClick(self, event):
-		pass
+		m.input(self.panel)
+		m.runSync(self.panel)
