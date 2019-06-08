@@ -1,0 +1,34 @@
+Hopfield.py is the main file to be compiled.
+Processor.py is the file with the neural network implemented.
+Buttons.py is the file with some of the buttons implemented for the GUI.
+Testing.py is the file which runs the neural network without the GUI.
+
+How to simulate the problem:
+On the left pad, draw a pattern (draw T) and press learn.
+Draw another pattern (draw X) and press learn.
+Now draw another pattern (a distorted T, like unclick a couple of boxes).
+And now press Run Async 1000.
+
+Output will appear on the right pad.
+
+Expected output: T
+Displayed output: X
+
+This is a neural network. 
+I am using it to learn patterns.
+So, if you teach it some patterns, and then give a distorted pattern, it will
+give you the correct pattern without the distortions.
+
+Optional:
+If you see the Testing.py file, I have put in T, X and H as patterns (1 as ON
+and -1 as OFF)
+a, b and e are T, X and H, respectively. c, d and f are their distorted versions.
+read_matrix() : reads the given matrix into the input vector inside
+set_weights() : learns the given pattern from the input vector by setting its 
+weight matrix
+set_input() : copies the input vector into the output vector (computation happens
+using the output vector, thats why)
+run_async() : runs the prediction of pattern (number inside means how many neurons
+are fired)
+print_matrix() : displays a given matrix
+get_matrix() : converts the output vector into a matrix and returns it
