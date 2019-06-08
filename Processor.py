@@ -1,70 +1,85 @@
-import wx
-import numpy as np
-import random
+from random import randint
 
-class Matrix():
+class Network():
 	def __init__(self):
-		self.matrix = [[0 for i in range(7)] for j in range(7)]
-		self.trigger = True
-		self.vector = [0 for i in range(49)]
+		self.inputs = [0 for i in range(49)]
+		self.outputs = [0 for i in range(49)]
+		self.threshold = [0 for i in range(49)]
+		self.weights = [[0 for i in range(49)] for j in range(49)]
+		self.start = True
 
-	def input(self, panel):
-		if self.trigger:
-			for i in range(7):
-				for j in range(7):
-					self.matrix[i][j] = panel.matrix[i][j].getVal()
-			self.trigger = False
-		else:
-			for i in range(7):
-				for j in range(7):
-					self.matrix[i][j] = panel.secondMatrix[i][j].getVal()
+	def read_matrix(self, matrix):
 		for i in range(7):
 			for j in range(7):
-				self.vector[i*7+j] = self.matrix[i][j]
+				self.inputs[i*7+j] = matrix[i][j]
 
-	def sign(self, value):
-		if value >= 0:
-			return 1
-		else:
-			return 0
-
-	def output(self, panel):
+	def get_matrix(self):
+		matrix = [[0 for i in range(7)] for j in range(7)]
 		for i in range(7):
 			for j in range(7):
-				panel.secondMatrix[i][j].setVal(self.matrix[i][j])
+				matrix[i][j] = self.outputs[i*7+j]
+		return matrix
 
-	def update(self):
-		for i in range(49):
-			self.matrix[int(i/7)][i%7] = self.vector[i]
-
-	def runAsync(self, panel, number):
-		for i in range(number):
-			r = random.randint(0,48)
-			temp = 0
-			for j in range(49):
-				if r != j:
-					temp += panel.learn.unwinded_matrix[r][j]*self.vector[j]
-			self.vector[r] = self.sign(temp)
-		self.update()
-		self.output(panel)
-
-	def runSync(self, panel):
-		vector = [0 for i in range(49)]
+	def set_weights(self):
 		for i in range(49):
 			for j in range(49):
 				if i != j:
-					vector[i] += panel.learn.unwinded_matrix[i][j]*self.vector[j]
-			vector[i] = self.sign(vector[i])
-		self.vector = vector
-		self.update()
-		self.output(panel)
+					self.weights[i][j] += (self.inputs[i]*self.inputs[j])
+
+	def set_input(self):
+		for i in range(49):
+			self.outputs[i] = self.inputs[i]
+
+	def async_iteration(self, i):
+		sum = 0
+		for j in range(49):
+			sum += self.weights[i][j]*self.outputs[j]
+		if sum != self.threshold[i]:
+			if sum > self.threshold[i]:
+				out = 1
+			if sum < self.threshold[i]:
+				out = -1
+			if out != self.outputs[i]:
+				self.outputs[i] = out
+
+	def run_async(self, iterations):
+		if self.start:
+			self.set_input()
+			self.start = False
+		for i in range(iterations):
+			r = randint(0, 48)
+			self.async_iteration(r)
+
+	def sync_iteration(self):
+		outputs = [0 for i in range(49)]
+		for i in range(49):
+			sum = 0
+			for j in range(49):
+				sum += self.weights[i][j]*self.outputs[j]
+			if sum != self.threshold[i]:
+				if sum > self.threshold[i]:
+					out = 1
+				if sum < self.threshold[i]:
+					out = -1
+				outputs[i] = out
+		for i in range(49):
+			self.outputs[i] = outputs[i]
+
+	def run_sync(self):	
+		if self.start:
+			self.set_input()
+			self.start = False
+		self.sync_iteration()
 
 	def reset(self):
-		for i in range(7):
-			for j in range(7):
-				self.matrix[i][j] = 0
-				self.vector[i*7+j] = 0
-		self.trigger = True
+		self.__init__()
 
-if __name__ == '__main__':
-	a = Matrix()
+	def energy(self, vector):
+		sum = 0
+		for i in range(49):
+			for j in range(49):
+				sum += self.weights[i][j]*vector[i]*vector[j]
+		return 0.5*sum
+
+	def calcEnergy(self):
+		return (self.energy(self.inputs), self.energy(self.outputs))

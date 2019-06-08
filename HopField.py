@@ -21,7 +21,7 @@ class MyButton(wx.Button):
 
 	def onClick(self, event):
 		if self.value == 1:
-			self.value = 0
+			self.value = -1
 			self.SetBackgroundColour('white')
 		else:
 			self.value = 1
@@ -75,57 +75,46 @@ class MyPanel(wx.Panel):
 		self.energy1.SetLabel('Energy: 0.0')
 		self.energy2 = wx.StaticText(self, pos=(1050, 575))
 		self.energy2.SetLabel('Energy: 0.0')
+		self.network = Network()
 
+	def get_matrix(self, buttonGrid):
+		matrix = [[0 for i in range(7)] for j in range(7)]
+		for i in range(7):
+			for j in range(7):
+				matrix[i][j] = buttonGrid[i][j].getVal()
+		return matrix
+
+	def set_matrix(self, buttonGrid, matrix):
+		for i in range(7):
+			for j in range(7):
+				buttonGrid[i][j].setVal(matrix[i][j])
+
+	def clear_button_grid(self, buttonGrid):
+		for i in range(7):
+			for j in range(7):
+				buttonGrid[i][j].setVal(-1)
+
+def print_matrix(matrix):
+	for i in range(len(matrix)):
+		string = ''
+		for j in range(len(matrix)):
+			string += str(1 if matrix[i][j] == 1 else 0) + ' '
+		print(string)
 
 class LearnButton(wx.Button):
 	def __init__(self, panel, pos):
 		super().__init__(panel, label="Learn", pos=pos)
-		self.matrix = []
 		self.panel = panel
-		for i in range(7):
-			temp = []
-			for j in range(7):
-				temp.append(0)
-			self.matrix.append(temp)
 		self.Bind(wx.EVT_BUTTON, self.onClick)
-		self.energy = 0
-		self.unwinded_matrix = [[0 for x in range(49)] for y in range(49)]
-		self.unwinded_vector = []
-		for i in range(7):
-			for j in range(7):
-				self.unwinded_vector.append(self.matrix[i][j])
-	
+
 	def calcEnergy(self):
-		self.energy = 0
-		for i in range(7):
-			for j in range(7):
-				self.unwinded_vector[i*7+j]  = self.panel.matrix[i][j].getVal()
-		for i in range(49):
-			for j in range(49):
-				self.energy += self.unwinded_matrix[i][j]*self.unwinded_vector[i]*self.unwinded_vector[j]
-		self.energy = -1*(self.energy/2)
-		self.panel.energy1.SetLabel('Energy: '+str(self.energy+0))
-		for i in range(7):
-			for j in range(7):
-				self.unwinded_vector[i*7+j] = self.panel.secondMatrix[i][j].getVal()
-		self.energy = 0
-		for i in range(49):
-			for j in range(49):
-				self.energy += self.unwinded_matrix[i][j]*self.unwinded_vector[i]*self.unwinded_vector[j]
-		self.energy = -1*(self.energy/2)
-		self.panel.energy2.SetLabel('Energy: '+str(self.energy+0))
+		energy1, energy2 = self.panel.network.calcEnergy()
+		self.panel.energy1.SetLabel('Energy: '+str(energy1+0))
+		self.panel.energy2.SetLabel('Energy: '+str(energy2+0))
 
 	def onClick(self, event):
-		for i in range(7):
-			for j in range(7):
-				self.matrix[i][j] += self.panel.matrix[i][j].getVal()
-		for i in range(7):
-			for j in range(7):
-				self.unwinded_vector[i*7+j] = self.matrix[i][j]
-		for i in range(49):
-			for j in range(49):
-				if i != j:
-					self.unwinded_matrix[i][j] += (2*self.unwinded_vector[i]-1)*(2*self.unwinded_vector[j]-1)
+		self.panel.network.read_matrix(self.panel.get_matrix(self.panel.matrix))
+		self.panel.network.set_weights()
 		self.calcEnergy()
 		
 
@@ -136,6 +125,5 @@ class MyApp(wx.App):
 		return True
 
 if __name__ == '__main__':
-	print(m)
 	app = MyApp()
 	app.MainLoop()

@@ -3,7 +3,7 @@ import wx
 import random
 from Processor import *
 
-m = Matrix()
+trigger = True
 
 class ClearButton(wx.Button):
 	def __init__(self, panel, pos):
@@ -12,12 +12,9 @@ class ClearButton(wx.Button):
 		self.Bind(wx.EVT_BUTTON, self.onClick)
 
 	def onClick(self, event):
-		for i in range(7):
-			for j in range(7):
-				self.panel.matrix[i][j].setVal(0)
-				self.panel.secondMatrix[i][j].setVal(0)
-		m.reset()
-		self.panel.learn.calcEnergy()
+		self.panel.clear_button_grid(self.panel.secondMatrix)
+		self.panel.clear_button_grid(self.panel.matrix)
+		self.panel.network.start = True
 
 class RestartButton(wx.Button):
 	def __init__(self, panel, pos):
@@ -26,19 +23,23 @@ class RestartButton(wx.Button):
 		self.Bind(wx.EVT_BUTTON, self.onClick)
 
 	def onClick(self, event):
-		for i in range(7):
-			for j in range(7):
-				self.panel.matrix[i][j].setVal(0)
-				self.panel.learn.matrix[i][j] = 0
-				self.panel.secondMatrix[i][j].setVal(0)
-		for i in range(49):
-			for j in range(49):
-				self.panel.learn.unwinded_matrix[i][j] = 0
-		for i in range(49):
-			self.panel.learn.unwinded_vector[i] = 0
-		m.reset()
-		self.panel.learn.calcEnergy()
+		self.panel.clear_button_grid(self.panel.secondMatrix)
+		self.panel.clear_button_grid(self.panel.matrix)
+		self.panel.network.reset()
 
+def print_matrix(matrix):
+	for i in range(len(matrix)):
+		string = ''
+		for j in range(len(matrix)):
+			string += str(1 if matrix[i][j] == 1 else 0) + ' '
+		print(string)
+
+def print_vector(vector):
+	temp = [[0 for i in range(7)] for j in range(7)]
+	for i in range(7):
+		for j in range(7):
+			temp[i][j] = vector[i*7+j]
+	print_matrix(temp)
 
 class RunAsync10(wx.Button): #This needs a complete rework, it is messing with the learnt parameters, need to make its own versions of things and pass it between the other classes
 	def __init__(self, panel, pos):
@@ -47,9 +48,21 @@ class RunAsync10(wx.Button): #This needs a complete rework, it is messing with t
 		self.Bind(wx.EVT_BUTTON, self.onClick)
 
 	def onClick(self, event):
-		m.input(self.panel)
-		m.runAsync(self.panel, 10)
-		self.panel.learn.calcEnergy()
+		global trigger
+		if trigger:
+			self.panel.set_matrix(self.panel.secondMatrix, self.panel.get_matrix(self.panel.matrix))
+			trigger = False
+		self.panel.network.read_matrix(self.panel.get_matrix(self.panel.secondMatrix))
+		self.panel.network.set_input()
+		self.panel.network.run_async(10)
+		self.panel.set_matrix(self.panel.secondMatrix, self.panel.network.get_matrix())'''
+		self.panel.network.read_matrix(self.panel.get_matrix(self.panel.matrix))
+		print_matrix(self.panel.get_matrix(self.panel.matrix))
+		self.panel.network.set_input()
+		print_vector(self.panel.network.inputs)
+		print_vector(self.panel.network.outputs)
+		self.panel.network.run_async(1000)
+		self.panel.set_matrix(self.panel.secondMatrix, self.panel.network.get_matrix())'''
 
 class RunAsync100(wx.Button):
 	def __init__(self, panel, pos):
@@ -58,9 +71,14 @@ class RunAsync100(wx.Button):
 		self.panel = panel
 
 	def onClick(self, event):
-		m.input(self.panel)
-		m.runAsync(self.panel, 100)
-		self.panel.learn.calcEnergy()
+		global trigger
+		if trigger:
+			self.panel.set_matrix(self.panel.secondMatrix, self.panel.get_matrix(self.panel.matrix))
+			trigger = False
+		self.panel.network.read_matrix(self.panel.get_matrix(self.panel.secondMatrix))
+		self.panel.network.set_input()
+		self.panel.network.run_async(100)
+		self.panel.set_matrix(self.panel.secondMatrix, self.panel.network.get_matrix())
 
 class RunAsync1000(wx.Button):
 	def __init__(self, panel, pos):
@@ -69,9 +87,14 @@ class RunAsync1000(wx.Button):
 		self.panel = panel
 
 	def onClick(self, event):
-		m.input(self.panel)
-		m.runAsync(self.panel, 1000)
-		self.panel.learn.calcEnergy()
+		global trigger
+		if trigger:
+			self.panel.set_matrix(self.panel.secondMatrix, self.panel.get_matrix(self.panel.matrix))
+			trigger = False
+		self.panel.network.read_matrix(self.panel.get_matrix(self.panel.secondMatrix))
+		self.panel.network.set_input()
+		self.panel.network.run_async(1000)
+		self.panel.set_matrix(self.panel.secondMatrix, self.panel.network.get_matrix())
 
 
 class RunSync(wx.Button):
@@ -81,6 +104,11 @@ class RunSync(wx.Button):
 		self.panel = panel
 
 	def onClick(self, event):
-		m.input(self.panel)
-		m.runSync(self.panel)
-		self.panel.learn.calcEnergy()
+		global trigger
+		if trigger:
+			self.panel.set_matrix(self.panel.secondMatrix, self.panel.get_matrix(self.panel.matrix))
+			trigger = False
+		self.panel.network.read_matrix(self.panel.get_matrix(self.panel.secondMatrix))
+		self.panel.network.set_input()
+		self.panel.network.run_sync()
+		self.panel.set_matrix(self.panel.secondMatrix, self.panel.network.get_matrix())
